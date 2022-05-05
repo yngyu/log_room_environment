@@ -1,2 +1,7 @@
-idf_component_register(SRCS "main.c"
-                    INCLUDE_DIRS ".")
+idf_component_register(
+    SRCS
+        "src/main.c"
+        "src/lib/bme680.c"
+    INCLUDE_DIRS
+        "."
+)
