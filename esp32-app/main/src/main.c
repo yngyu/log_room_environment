@@ -6,6 +6,9 @@
 #include "lib/bme680.h"
 #include "settings.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 static esp_err_t i2c_master_init(void)
 {
     int i2c_master_port = I2C_MASTER_NUM;
