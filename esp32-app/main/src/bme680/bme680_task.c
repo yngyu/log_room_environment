@@ -1,13 +1,16 @@
-#include "esp_log.h"
-#include "driver/i2c.h"
+#include <string.h>
+#include <stdio.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "../lib/bme680.h"
+#include "esp_log.h"
+#include "driver/i2c.h"
 
-#define I2C_MASTER_SCL_IO         (19)
-#define I2C_MASTER_SDA_IO         (18)
+#include "../lib/bme68x.h"
+
+#define I2C_MASTER_SCL_IO         (22)
+#define I2C_MASTER_SDA_IO         (21)
 
 #define I2C_MASTER_NUM            (0)
 
@@ -17,6 +20,12 @@
 #define I2C_MASTER_TIMEOUT_MS     (1000)
 
 #define BME680_TASK_INTERVAL_MS (1000)
+
+uint8_t dev_addr = BME68X_I2C_ADDR_HIGH;
+
+static struct bme68x_dev bme;
+static struct bme68x_conf conf;
+static struct bme68x_heatr_conf heatr_conf;
 
 static esp_err_t i2c_master_init(void)
 {
@@ -36,26 +45,79 @@ static esp_err_t i2c_master_init(void)
     return i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 }
 
-void bme680_task_init(void* param)
+bme68x_read_fptr_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
+{
+    (void)intf_ptr;
+    esp_err_t ret = i2c_master_write_read_device(I2C_MASTER_NUM, dev_addr, &reg_addr, 1, reg_data, len, I2C_MASTER_TIMEOUT_MS/portTICK_RATE_MS);
+    return (bme68x_read_fptr_t)ret;
+}
+
+bme68x_write_fptr_t bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr)
+{
+    (void)intf_ptr;
+
+    uint8_t* tx_data = malloc(len + 1);
+    tx_data[0] = reg_addr;
+    memcpy(tx_data + 1, reg_data, len);
+    esp_err_t ret = i2c_master_write_to_device(I2C_MASTER_NUM, dev_addr, tx_data, len + 1, I2C_MASTER_TIMEOUT_MS/portTICK_RATE_MS);
+    free(tx_data);
+
+    return (bme68x_write_fptr_t)ret;
+}
+
+// period: microsecond
+void bme68x_delay_us(uint32_t period, void *intf_ptr)
+{
+    uint32_t wait = period > 1000*portTICK_RATE_MS ? period/1000/portTICK_RATE_MS : 1;
+    vTaskDelay(wait);
+}
+
+void bme680_task_init(void)
 {
     ESP_ERROR_CHECK(i2c_master_init());
 
-    bme680_sensor_t* sensor = bme680_init_sensor(I2C_MASTER_NUM, BME680_I2C_ADDRESS_2, 0);
-    bme680_set_oversampling_rates(sensor, osr_16x, osr_16x, osr_16x);
-    bme680_set_filter_size(sensor, iir_size_7);
-    bme680_set_heater_profile(sensor, 0, 200, 30);
-    bme680_use_heater_profile(sensor, 0);
+    bme.read = bme68x_i2c_read;
+    bme.write = bme68x_i2c_write;
+    bme.intf = BME68X_I2C_INTF;
+    bme.delay_us = bme68x_delay_us;
+    bme.intf_ptr = &dev_addr;
+    bme.amb_temp = 25;
+    ESP_ERROR_CHECK(bme68x_init(&bme));
+
+    conf.filter = BME68X_FILTER_SIZE_127;
+    conf.odr = BME68X_ODR_NONE;
+    conf.os_hum = BME68X_OS_16X;
+    conf.os_pres = BME68X_OS_16X;
+    conf.os_temp = BME68X_OS_16X;
+    ESP_ERROR_CHECK(bme68x_set_conf(&conf, &bme));
+
+    heatr_conf.enable = BME68X_ENABLE;
+    heatr_conf.heatr_temp = 300;
+    heatr_conf.heatr_dur = 100;
+    ESP_ERROR_CHECK(bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf, &bme));
 }
 
 void bme680_task(void* param)
 {
     TickType_t xLastWaketime = xTaskGetTickCount();
-    uint32_t duration = 
+    struct bme68x_data* result = (struct bme68x_data*)param;
 
     while(true){
-        bme680_values_float_t* values = (bme680_values_float_t*)param;
+        ESP_ERROR_CHECK(bme68x_set_op_mode(BME68X_FORCED_MODE, &bme));
 
-        vTaskDelayUntil(&xLastTickCount, BME680_TASK_INTERVAL_MS/portTICK_RATE_MS);
+        // gets microseconds
+        uint32_t duration = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme) + (heatr_conf.heatr_dur * 1000);
+        vTaskDelay(duration/1000/portTICK_RATE_MS);
+        uint8_t get_flag = 0;
+        ESP_ERROR_CHECK(bme68x_get_data(BME68X_FORCED_MODE, result, &get_flag, &bme));
+        printf("%.2f, %.2f, %.2f, %.2f, 0x%x\n",
+                result->temperature,
+                result->pressure,
+                result->humidity,
+                result->gas_resistance,
+                result->status);
+
+        vTaskDelayUntil(&xLastWaketime, BME680_TASK_INTERVAL_MS/portTICK_RATE_MS);
     }
 }
 
