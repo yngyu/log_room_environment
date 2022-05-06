@@ -1,5 +1,6 @@
+#include "bme680_task.h"
+
 #include <string.h>
-#include <stdio.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -21,7 +22,7 @@
 #define I2C_MASTER_RX_BUF_DISABLE (0)
 #define I2C_MASTER_TIMEOUT_MS     (1000)
 
-#define BME680_TASK_INTERVAL_MS (1000)
+#define BME680_TASK_INTERVAL_MS   (1000)
 
 uint8_t dev_addr = BME68X_I2C_ADDR_HIGH;
 

@@ -7,6 +7,7 @@
 
 #include "user_def.h"
 #include "bme680/bme680_task.h"
+#include "mg812/mg812_task.h"
 
 void print_task(void* param)
 {
@@ -14,7 +15,7 @@ void print_task(void* param)
 
     EnvData* env_data = (EnvData*)param;
     while(true){
-        printf("%.2f, %.2f, %.2f, %.2f\n",
+        printf("%f, %f, %f, %f\n",
                 env_data->temperature,
                 env_data->pressure,
                 env_data->humidity,
@@ -27,6 +28,7 @@ void print_task(void* param)
 void init_task(void* param)
 {
     bme680_task_init();
+    mg812_task_init();
 
     vTaskDelete(NULL);
 }
@@ -37,6 +39,7 @@ void app_main(void)
 
     xTaskCreatePinnedToCore(init_task, "init_task", 4096, NULL, 10, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(bme680_task, "bme680_task", 4096, &env_data, 5, NULL, APP_CPU_NUM);
+    xTaskCreatePinnedToCore(mg812_task, "mg812_task", 4096, &env_data, 5, NULL, APP_CPU_NUM);
 
     xTaskCreatePinnedToCore(print_task, "print_task", 4096, &env_data, 5, NULL, APP_CPU_NUM);
 }
