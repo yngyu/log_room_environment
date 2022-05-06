@@ -8,6 +8,7 @@
 #include "user_def.h"
 #include "bme680/bme680_task.h"
 #include "mg812/mg812_task.h"
+#include "ble/ble_task.h"
 
 void print_task(void* param)
 {
@@ -25,7 +26,7 @@ void print_task(void* param)
     }
 }
 
-void init_task(void* param)
+void sensor_init_task(void* param)
 {
     bme680_task_init();
     mg812_task_init();
@@ -37,9 +38,12 @@ void app_main(void)
 {
     EnvData env_data;
 
-    xTaskCreatePinnedToCore(init_task, "init_task", 4096, NULL, 10, NULL, APP_CPU_NUM);
+    xTaskCreatePinnedToCore(sensor_init_task, "sensor_init_task", 4096, NULL, 10, NULL, APP_CPU_NUM);
+
     xTaskCreatePinnedToCore(bme680_task, "bme680_task", 4096, &env_data, 5, NULL, APP_CPU_NUM);
     xTaskCreatePinnedToCore(mg812_task, "mg812_task", 4096, &env_data, 5, NULL, APP_CPU_NUM);
+
+    ble_start(&env_data);
 
     xTaskCreatePinnedToCore(print_task, "print_task", 4096, &env_data, 5, NULL, APP_CPU_NUM);
 }

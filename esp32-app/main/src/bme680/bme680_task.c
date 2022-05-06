@@ -87,7 +87,7 @@ void bme680_task_init(void)
     bme.amb_temp = 25;
     ESP_ERROR_CHECK(bme68x_init(&bme));
 
-    conf.filter = BME68X_FILTER_SIZE_127;
+    conf.filter = BME68X_FILTER_SIZE_7;
     conf.odr = BME68X_ODR_NONE;
     conf.os_hum = BME68X_OS_16X;
     conf.os_pres = BME68X_OS_16X;
