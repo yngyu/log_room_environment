@@ -9,6 +9,8 @@
 
 #include "../lib/bme68x.h"
 
+#include "../user_def.h"
+
 #define I2C_MASTER_SCL_IO         (22)
 #define I2C_MASTER_SDA_IO         (21)
 
@@ -91,16 +93,14 @@ void bme680_task_init(void)
     conf.os_temp = BME68X_OS_16X;
     ESP_ERROR_CHECK(bme68x_set_conf(&conf, &bme));
 
-    heatr_conf.enable = BME68X_ENABLE;
-    heatr_conf.heatr_temp = 300;
-    heatr_conf.heatr_dur = 100;
+    heatr_conf.enable = BME68X_DISABLE;
     ESP_ERROR_CHECK(bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf, &bme));
 }
 
 void bme680_task(void* param)
 {
     TickType_t xLastWaketime = xTaskGetTickCount();
-    struct bme68x_data* result = (struct bme68x_data*)param;
+    EnvData* env_data = (EnvData*)param;
 
     while(true){
         ESP_ERROR_CHECK(bme68x_set_op_mode(BME68X_FORCED_MODE, &bme));
@@ -109,13 +109,11 @@ void bme680_task(void* param)
         uint32_t duration = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme) + (heatr_conf.heatr_dur * 1000);
         vTaskDelay(duration/1000/portTICK_RATE_MS);
         uint8_t get_flag = 0;
-        ESP_ERROR_CHECK(bme68x_get_data(BME68X_FORCED_MODE, result, &get_flag, &bme));
-        printf("%.2f, %.2f, %.2f, %.2f, 0x%x\n",
-                result->temperature,
-                result->pressure,
-                result->humidity,
-                result->gas_resistance,
-                result->status);
+        struct bme68x_data data;
+        ESP_ERROR_CHECK(bme68x_get_data(BME68X_FORCED_MODE, &data, &get_flag, &bme));
+        env_data->temperature = data.temperature;
+        env_data->pressure = data.pressure;
+        env_data->humidity = data.humidity;
 
         vTaskDelayUntil(&xLastWaketime, BME680_TASK_INTERVAL_MS/portTICK_RATE_MS);
     }
