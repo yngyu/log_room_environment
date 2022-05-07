@@ -8,5 +8,6 @@
   * OS: Raspbion 32 bit
 * BME680
   * 気圧、温度、湿度センサー (ガスも測れるが使っていない).
+  * https://github.com/BoschSensortec/BME68x-Sensor-API のライブラリを使用
 * MG812
   * CO2 センサー
