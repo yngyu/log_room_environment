@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "freertos.h": "c",
+        "env_data.h": "c",
+        "gpio.h": "c",
+        "string.h": "c",
+        "freertosconfig.h": "c",
+        "stdbool.h": "c",
+        "semphr.h": "c",
+        "request.h": "c",
+        "esp_wifi.h": "c",
+        "esp_system.h": "c",
+        "nvs_flash.h": "c"
+    }
+}
