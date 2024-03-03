@@ -5,15 +5,17 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+#include "esp_system.h"
 #include "esp_log.h"
 #include "driver/i2c.h"
+#include "driver/gpio.h"
 
 #include "../lib/bme68x.h"
 
-#include "../user_def.h"
+#include "../env_data.h"
 
-#define I2C_MASTER_SCL_IO         (22)
-#define I2C_MASTER_SDA_IO         (21)
+#define I2C_MASTER_SCL_IO         (GPIO_NUM_7)
+#define I2C_MASTER_SDA_IO         (GPIO_NUM_6)
 
 #define I2C_MASTER_NUM            (0)
 
@@ -51,7 +53,7 @@ static esp_err_t i2c_master_init(void)
 bme68x_read_fptr_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr)
 {
     (void)intf_ptr;
-    esp_err_t ret = i2c_master_write_read_device(I2C_MASTER_NUM, dev_addr, &reg_addr, 1, reg_data, len, I2C_MASTER_TIMEOUT_MS/portTICK_RATE_MS);
+    esp_err_t ret = i2c_master_write_read_device(I2C_MASTER_NUM, dev_addr, &reg_addr, 1, reg_data, len, I2C_MASTER_TIMEOUT_MS/portTICK_PERIOD_MS);
     return (bme68x_read_fptr_t)ret;
 }
 
@@ -62,7 +64,7 @@ bme68x_write_fptr_t bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, 
     uint8_t* tx_data = malloc(len + 1);
     tx_data[0] = reg_addr;
     memcpy(tx_data + 1, reg_data, len);
-    esp_err_t ret = i2c_master_write_to_device(I2C_MASTER_NUM, dev_addr, tx_data, len + 1, I2C_MASTER_TIMEOUT_MS/portTICK_RATE_MS);
+    esp_err_t ret = i2c_master_write_to_device(I2C_MASTER_NUM, dev_addr, tx_data, len + 1, I2C_MASTER_TIMEOUT_MS/portTICK_PERIOD_MS);
     free(tx_data);
 
     return (bme68x_write_fptr_t)ret;
@@ -71,7 +73,7 @@ bme68x_write_fptr_t bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, 
 // period: microsecond
 void bme68x_delay_us(uint32_t period, void *intf_ptr)
 {
-    uint32_t wait = period > 1000*portTICK_RATE_MS ? period/1000/portTICK_RATE_MS : 1;
+    uint32_t wait = period > 1000*portTICK_PERIOD_MS ? period/1000/portTICK_PERIOD_MS : 1;
     vTaskDelay(wait);
 }
 
@@ -98,25 +100,30 @@ void bme680_task_init(void)
     ESP_ERROR_CHECK(bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf, &bme));
 }
 
-void bme680_task(void* param)
+void bme680_task(void* pvParameters)
 {
     TickType_t xLastWaketime = xTaskGetTickCount();
-    EnvData* env_data = (EnvData*)param;
+    EnvData* env_data = (EnvData*)pvParameters;
 
     while(true){
         ESP_ERROR_CHECK(bme68x_set_op_mode(BME68X_FORCED_MODE, &bme));
 
         // gets microseconds
         uint32_t duration = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme) + (heatr_conf.heatr_dur * 1000);
-        vTaskDelay(duration/1000/portTICK_RATE_MS);
+        vTaskDelay(duration/1000/portTICK_PERIOD_MS);
         uint8_t get_flag = 0;
         struct bme68x_data data;
         ESP_ERROR_CHECK(bme68x_get_data(BME68X_FORCED_MODE, &data, &get_flag, &bme));
-        env_data->temperature = data.temperature;
-        env_data->pressure = data.pressure;
-        env_data->humidity = data.humidity;
 
-        vTaskDelayUntil(&xLastWaketime, BME680_TASK_INTERVAL_MS/portTICK_RATE_MS);
+        if (xSemaphoreTake(env_data->semaphore, portMAX_DELAY) == pdTRUE) {
+            env_data->temperature = data.temperature;
+            env_data->pressure = data.pressure;
+            env_data->humidity = data.humidity;
+
+            xSemaphoreGive(env_data->semaphore);
+        }
+
+        vTaskDelayUntil(&xLastWaketime, BME680_TASK_INTERVAL_MS/portTICK_PERIOD_MS);
     }
 }
 

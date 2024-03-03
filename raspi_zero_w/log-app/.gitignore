@@ -1,5 +1,0 @@
-.venv/
-poetry.lock
-pyproject.toml
-
-local-value.json
