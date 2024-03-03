@@ -48,6 +48,7 @@ void app_main()
 
     xTaskCreate(mh_z19c_task, "mh_z19c_task", 2048, &env_data, 1, NULL);
     xTaskCreate(bme680_task, "bme680_task", 2048, &env_data, 1, NULL);
+    xTaskCreate(wifi_task, "wifi_task", 2048, &env_data, 1, NULL);
 
     xTaskCreate(request_task, "request_task", 16384, &env_data, 2, NULL);
 
@@ -61,11 +62,12 @@ void print_task(void* pvParameters)
 
     while(true){
         if (xSemaphoreTake(env_data->semaphore, portMAX_DELAY) == pdTRUE) {
-            printf("%f, %f, %f, %f\n",
+            printf("%f, %f, %f, %f, %d\n",
                 env_data->temperature,
                 env_data->pressure,
                 env_data->humidity,
-                env_data->co2_ppm);
+                env_data->co2_ppm,
+                env_data->rssi);
 
             xSemaphoreGive(env_data->semaphore);
         }

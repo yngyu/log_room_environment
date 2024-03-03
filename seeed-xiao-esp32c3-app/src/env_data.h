@@ -13,6 +13,8 @@ typedef struct
     float pressure;
     float co2_ppm;
 
+    int rssi;
+
     SemaphoreHandle_t semaphore;
 } EnvData;
 

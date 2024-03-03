@@ -133,13 +133,14 @@ void request_task(void *pvParameters)
 
         if (xSemaphoreTake(env_data->semaphore, portMAX_DELAY) == pdTRUE) {
             is_valid = validate_env_data(env_data);
-            sprintf(post_data, "%s,sensor_id=%s temperature=%.2f,pressure=%.2f,humidity=%.2f,co2_ppm=%.2f",
+            sprintf(post_data, "%s,sensor_id=%s temperature=%.2f,pressure=%.2f,humidity=%.2f,co2_ppm=%.2f,rssi=%d",
                 place_tag,
                 sensor_tag,
                 env_data->temperature,
                 env_data->pressure,
                 env_data->humidity,
-                env_data->co2_ppm);
+                env_data->co2_ppm,
+                env_data->rssi);
 
             xSemaphoreGive(env_data->semaphore);
         }

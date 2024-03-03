@@ -15,12 +15,14 @@
 
 #include "wifi_config.h"
 
+#include "../env_data.h"
+
 /* The examples use WiFi configuration that you can set via project configuration menu
 
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_MAXIMUM_RETRY  (100)
+#define EXAMPLE_ESP_MAXIMUM_RETRY (100)
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -30,6 +32,8 @@ static EventGroupHandle_t s_wifi_event_group;
  * - we failed to connect after the maximum amount of retries */
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
+
+#define WIFI_TASK_INTERVAL_MS (1000)
 
 static const char *TAG = "wifi station";
 
@@ -95,6 +99,7 @@ void wifi_init_sta(void)
         },
     };
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
+    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
 
@@ -122,4 +127,23 @@ void wifi_init_sta(void)
     ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
     ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
     vEventGroupDelete(s_wifi_event_group);
+}
+
+void wifi_task(void *pvParameters)
+{
+    TickType_t xLastWaketime = xTaskGetTickCount();
+    EnvData* env_data = (EnvData*)pvParameters;
+
+    while(true) {
+        int rssi;
+        esp_wifi_sta_get_rssi(&rssi);
+
+        if (xSemaphoreTake(env_data->semaphore, portMAX_DELAY) == pdTRUE) {
+            env_data->rssi = rssi;
+
+            xSemaphoreGive(env_data->semaphore);
+        }
+
+        vTaskDelayUntil(&xLastWaketime, WIFI_TASK_INTERVAL_MS/portTICK_PERIOD_MS);
+    }
 }
