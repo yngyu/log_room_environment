@@ -103,10 +103,11 @@ void request_init(void)
     esp_log_level_set(TAG, ESP_LOG_INFO);
 
     esp_http_client_config_t config = {
-        .url = "http://localhost",
+        .url = "https://localhost",
         .event_handler = _http_event_handler,
         .user_data = local_response_buffer,        // Pass address of local buffer to get response
         .disable_auto_redirect = true,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
 
     client = esp_http_client_init(&config);
@@ -151,7 +152,7 @@ void request_task(void *pvParameters)
             esp_err_t err = esp_http_client_perform(client);
 
             if (err != ESP_OK) {
-                ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+                ESP_LOGE(TAG, "Error perform http request %s", esp_err_to_name(err));
 
                 const TickType_t now = xTaskGetTickCount();
                 if (now - last_error_tick < 2 * 1000 * 10/portTICK_PERIOD_MS) {
