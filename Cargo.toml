@@ -1,0 +1,11 @@
+[package]
+name = "log_room_environment"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bme680 = { git = "https://github.com/marcelbuesing/bme680.git", rev = "838d1eaeb14be76a8d325eafd7e0896299aa9e68"}
+embedded-hal = "1.0.0"
+linux-embedded-hal = { version = "0.4.0", features = ["async-tokio", "i2c"] }
+reqwest = { version = "0.12.12", default-features = false, features = ["rustls-tls"] }
+tokio = { version = "1.43.0", features = ["full"] }
