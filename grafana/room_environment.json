@@ -26,7 +26,6 @@
   "graphTooltip": 0,
   "id": 25,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "collapsed": false,
@@ -69,8 +68,7 @@
               }
             ]
           },
-          "unit": "celsius",
-          "unitScale": true
+          "unit": "celsius"
         },
         "overrides": []
       },
@@ -86,6 +84,7 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -97,7 +96,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.3.3",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -133,8 +132,7 @@
               }
             ]
           },
-          "unit": "pressurehpa",
-          "unitScale": true
+          "unit": "pressurehpa"
         },
         "overrides": []
       },
@@ -150,6 +148,7 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -161,20 +160,20 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.3.3",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
           },
-          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"pressure\"\r\n  )\r\n  |> last()",
+          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"pressure\"\r\n  )\r\n  |> map(fn: (r) => ({r with _value: r._value / 100.0}))\r\n  |> last()",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
-      "title": "Panel Title",
+      "title": "Air Pressure",
       "type": "stat"
     },
     {
@@ -205,8 +204,7 @@
               }
             ]
           },
-          "unit": "percent",
-          "unitScale": true
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -222,6 +220,7 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -233,7 +232,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.3.3",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -305,8 +304,7 @@
               }
             ]
           },
-          "unit": "ppm",
-          "unitScale": true
+          "unit": "ppm"
         },
         "overrides": []
       },
@@ -322,6 +320,7 @@
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -333,7 +332,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.3.3",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -346,7 +345,7 @@
           "resultFormat": "time_series"
         }
       ],
-      "title": "Panel Title",
+      "title": "CO2 PPM",
       "type": "stat"
     },
     {
@@ -366,6 +365,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -401,8 +401,7 @@
               }
             ]
           },
-          "unit": "celsius",
-          "unitScale": true
+          "unit": "celsius"
         },
         "overrides": []
       },
@@ -418,13 +417,14 @@
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -442,7 +442,7 @@
           "measurement": "sensor_data",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"room_env\")\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r._measurement == \"Desk\" and\n    r._field == \"temperature\"\n  )",
+          "query": "from(bucket: \"room_env\")\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\n  |> filter(fn: (r) =>\n    r._measurement == \"Desk\" and\n    r._field == \"temperature\"\n  )\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -479,6 +479,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -514,8 +515,7 @@
               }
             ]
           },
-          "unit": "pressurehpa",
-          "unitScale": true
+          "unit": "pressurehpa"
         },
         "overrides": []
       },
@@ -531,13 +531,14 @@
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -561,7 +562,7 @@
           "measurement": "sensor_data",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"pressure\"\r\n  )",
+          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"pressure\"\r\n  )\r\n  |> map(fn: (r) => ({r with _value: r._value / 100.0}))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -578,7 +579,7 @@
           "tags": []
         }
       ],
-      "title": "Pressure",
+      "title": "Air Pressure",
       "type": "timeseries"
     },
     {
@@ -598,6 +599,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -637,8 +639,7 @@
               }
             ]
           },
-          "unit": "percent",
-          "unitScale": true
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -661,13 +662,14 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
           },
-          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"humidity\"\r\n  )",
+          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"humidity\"\r\n  )\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -693,6 +695,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -728,8 +731,7 @@
               }
             ]
           },
-          "unit": "ppm",
-          "unitScale": true
+          "unit": "ppm"
         },
         "overrides": []
       },
@@ -752,13 +754,14 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
           },
-          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"co2_ppm\"\r\n  )",
+          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"co2_ppm\"\r\n  )\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
@@ -775,9 +778,9 @@
         "x": 0,
         "y": 24
       },
-      "id": 18,
+      "id": 24,
       "panels": [],
-      "title": "Desk ESP32C3 RSSI",
+      "title": "Living",
       "type": "row"
     },
     {
@@ -795,17 +798,20 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "blue",
                 "value": null
               },
               {
                 "color": "green",
-                "value": -65
+                "value": 18
+              },
+              {
+                "color": "red",
+                "value": 28
               }
             ]
           },
-          "unit": "dBm",
-          "unitScale": true
+          "unit": "celsius"
         },
         "overrides": []
       },
@@ -815,12 +821,13 @@
         "x": 0,
         "y": 25
       },
-      "id": 20,
+      "id": 25,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -832,17 +839,15 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.3.3",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
           },
-          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"rssi\")\r\n  |> last()",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series"
+          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Living\" and\r\n    r._field == \"temperature\")\r\n  |> last()",
+          "refId": "A"
         }
       ],
       "title": "Temperature",
@@ -865,6 +870,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -903,9 +909,7 @@
                 "value": 80
               }
             ]
-          },
-          "unit": "dBm",
-          "unitScale": true
+          }
         },
         "overrides": []
       },
@@ -915,7 +919,7 @@
         "x": 6,
         "y": 25
       },
-      "id": 21,
+      "id": 23,
       "options": {
         "legend": {
           "calcs": [],
@@ -928,30 +932,30 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
           },
-          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"rssi\")",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series"
+          "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Living\" and\r\n    r._field == \"temperature\"\r\n  )\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
+          "refId": "A"
         }
       ],
-      "title": "RSSI",
+      "title": "Temperature",
       "type": "timeseries"
     }
   ],
+  "preload": false,
   "refresh": "5s",
-  "schemaVersion": 39,
+  "schemaVersion": 40,
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -962,6 +966,6 @@
   "timezone": "",
   "title": "room environment",
   "uid": "YBVq3TmRz",
-  "version": 5,
+  "version": 20,
   "weekStart": ""
 }
