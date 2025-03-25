@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 bme680 = { git = "https://github.com/marcelbuesing/bme680.git", rev = "838d1eaeb14be76a8d325eafd7e0896299aa9e68"}
 embedded-hal = "1.0.0"
+env_logger = "0.11.7"
 linux-embedded-hal = { version = "0.4.0", features = ["async-tokio", "i2c"] }
+log = "0.4.27"
 reqwest = { version = "0.12.14", default-features = false, features = ["rustls-tls"] }
 tokio = { version = "1.44.1", features = ["full"] }

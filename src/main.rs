@@ -2,6 +2,7 @@ mod mh_z19c;
 mod sensors;
 
 use linux_embedded_hal::{I2cdev, Serial};
+use log::{error, info};
 use reqwest::{
     Client,
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, HeaderMap},
@@ -17,12 +18,22 @@ async fn main() {
 
     loop {
         let now = Instant::now();
-        let _ = run(&mut sensors, &client).await;
+        let result = run(&mut sensors, &client).await;
+        match result {
+            Ok(_) => info!("Successfully sent measurements"),
+            Err(e) => {
+                error!("Failed to get measurements: {}", e);
+                panic!("Panicked with an error, {}", e);
+            }
+        }
+
         tokio::time::sleep_until(now + Duration::from_secs(1)).await;
     }
 }
 
 async fn init() -> Result<Sensors, Box<dyn std::error::Error>> {
+    env_logger::init();
+
     let serial = Serial::open("/dev/ttyS0".to_string(), 9600)?;
     let i2c_bus = I2cdev::new("/dev/i2c-1")?;
 
