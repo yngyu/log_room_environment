@@ -63,7 +63,10 @@ async fn run(sensors: &mut Sensors, client: &Client) -> Result<(), Box<dyn std::
         measurements.co2_ppm
     );
 
-    client.post(uri).headers(headers).body(body).send().await?;
+    // Does not panic on error, just logs it
+    if let Err(e) = client.post(uri).headers(headers).body(body).send().await {
+        error!("Failed to send measurements: {}", e);
+    }
 
     Ok(())
 }
