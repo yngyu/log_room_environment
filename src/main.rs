@@ -47,20 +47,37 @@ async fn run(sensors: &mut Sensors, client: &Client) -> Result<(), Box<dyn std::
     let token = var("INFLUXDB_TOKEN")?;
     let uri = var("INFLUXDB_URI")?;
 
-    let measurements = sensors.measure().await?;
+    let measurements = sensors.measure().await;
     let mut headers = HeaderMap::new();
     headers.insert(AUTHORIZATION, token.parse()?);
     headers.insert(CONTENT_TYPE, "text/plain; charset=utf-8".parse()?);
     headers.insert(ACCEPT, "application/json".parse()?);
 
+    let mut measurement_strs = Vec::new();
+    if measurements.temperature_celsius.is_some() {
+        measurement_strs.push(format!(
+            "temperature={:.2}",
+            measurements.temperature_celsius.unwrap()
+        ));
+    }
+    if measurements.pressure_pa.is_some() {
+        measurement_strs.push(format!("pressure={:.2}", measurements.pressure_pa.unwrap()));
+    }
+    if measurements.humidity_percent.is_some() {
+        measurement_strs.push(format!(
+            "humidity={:.2}",
+            measurements.humidity_percent.unwrap()
+        ));
+    }
+    if measurements.co2_ppm.is_some() {
+        measurement_strs.push(format!("co2_ppm={:.2}", measurements.co2_ppm.unwrap()));
+    }
+
     let body = format!(
-        "{},sensor_id={} temperature={:.2},pressure={:.2},humidity={:.2},co2_ppm={:.2}",
+        "{},sensor_id={} {}",
         "Desk",
         "RaspberryPiZeroW",
-        measurements.temperature_celsius,
-        measurements.pressure_pa,
-        measurements.humidity_percent,
-        measurements.co2_ppm
+        measurement_strs.join(","),
     );
 
     // Does not panic on error, just logs it
