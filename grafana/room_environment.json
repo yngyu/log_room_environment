@@ -1,4 +1,41 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB",
+      "label": "influxdb",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.1.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -24,7 +61,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 25,
+  "id": null,
   "links": [],
   "panels": [
     {
@@ -43,7 +80,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -56,7 +93,7 @@
             "steps": [
               {
                 "color": "blue",
-                "value": null
+                "value": 0
               },
               {
                 "color": "green",
@@ -96,12 +133,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"temperature\")\r\n  |> last()",
           "rawQuery": true,
@@ -115,7 +152,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -128,7 +165,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -160,12 +197,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"pressure\"\r\n  )\r\n  |> map(fn: (r) => ({r with _value: r._value / 100.0}))\r\n  |> last()",
           "rawQuery": true,
@@ -179,7 +216,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -192,7 +229,7 @@
             "steps": [
               {
                 "color": "yellow",
-                "value": null
+                "value": 0
               },
               {
                 "color": "green",
@@ -232,12 +269,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "groupBy": [
             {
@@ -283,7 +320,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -296,7 +333,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -332,12 +369,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"co2_ppm\"\r\n  )\r\n  |> last()",
           "rawQuery": true,
@@ -351,7 +388,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -397,7 +434,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -420,16 +457,17 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "groupBy": [
             {
@@ -465,7 +503,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -511,7 +549,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -534,16 +572,17 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "groupBy": [
             {
@@ -585,7 +624,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -631,7 +670,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -658,16 +697,17 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"humidity\"\r\n  )\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
           "rawQuery": true,
@@ -681,7 +721,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -727,7 +767,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -750,16 +790,17 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Desk\" and\r\n    r._field == \"co2_ppm\"\r\n  )\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
           "rawQuery": true,
@@ -786,7 +827,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -799,7 +840,7 @@
             "steps": [
               {
                 "color": "blue",
-                "value": null
+                "value": 0
               },
               {
                 "color": "green",
@@ -839,12 +880,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Living\" and\r\n    r._field == \"temperature\")\r\n  |> last()",
           "refId": "A"
@@ -856,7 +897,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -902,7 +943,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -928,16 +969,17 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.4.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
             "type": "influxdb",
-            "uid": "ed4ea948-6d35-4e57-bd3a-681d2bf5b0bd"
+            "uid": "${DS_INFLUXDB}"
           },
           "query": "from(bucket: \"room_env\")\r\n  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)\r\n  |> filter(fn: (r) =>\r\n    r._measurement == \"Living\" and\r\n    r._field == \"temperature\"\r\n  )\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)",
           "refId": "A"
@@ -947,15 +989,24 @@
       "type": "timeseries"
     }
   ],
-  "preload": false,
   "refresh": "5s",
-  "schemaVersion": 40,
+  "schemaVersion": 41,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {},
+        "name": "datasource",
+        "options": [],
+        "query": "influxdb",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      }
+    ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {
@@ -966,6 +1017,6 @@
   "timezone": "",
   "title": "room environment",
   "uid": "YBVq3TmRz",
-  "version": 20,
+  "version": 21,
   "weekStart": ""
 }
